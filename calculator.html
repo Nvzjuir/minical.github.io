@@ -85,32 +85,34 @@
       var CalFooter = {
         data() {
           return{
-            tags: ""
+            tags: '',
+            test:[],
+            nums:[]
           }
         },
         template: `
           <div class="footer">
               <div class="footer_nums">
                 <div class="nums_left">备注</div>
-                <div class="nums_right"></div>
+                <input class="nums_right" v-model="test" disabled max="8" />
               </div>
               <div class="warp">
                 <ul>
-                  <li>1</li>
-                  <li>2</li>
-                  <li>3</li>
+                  <li @click="handelNums(1)">1</li>
+                  <li @click="handelNums(2)">2</li>
+                  <li @click="handelNums(3)">3</li>
                   <li><input id=input v-model="tags" v-on:keyup.enter="newTag"
                        maxlength="4" placeholder="添加标签" onfocus="this.placeholder=''" onblur="this.placeholder='添加标签'" /></li>
-                  <li>4</li>
-                  <li>5</li>
-                  <li>6</li>
+                  <li @click="handelNums(4)">4</li>
+                  <li @click="handelNums(5)">5</li>
+                  <li @click="handelNums(6)">6</li>
                   <li>删除</li>
-                  <li>7</li>
-                  <li>8</li>
-                  <li>9</li>
+                  <li @click="handelNums(7)">7</li>
+                  <li @click="handelNums(8)">8</li>
+                  <li @click="handelNums(9)">9</li>
                   <li>清空</li>
                   <li style="width: 50%;">0</li>
-                  <li>.</li>
+                  <li @click="handelNums('.')">.</li>
                   <li>OK</li>
                 </ul>
               </div>
@@ -128,6 +130,12 @@
             input.placeholder="添加标签"
             this.tags=""
             input.blur();
+          },
+          handelNums: function(e) {
+            if(this.test.length<8){
+              this.nums.push(e)
+              this.test = this.nums.join("")
+            }
           }
         }
       }

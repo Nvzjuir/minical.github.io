@@ -90,6 +90,9 @@ input {
 .footer .footer_nums .nums_right {
   flex: 4;
   background-color: #FFE4C4;
+  text-align: right;
+  padding-right: 5rem;
+  font-size: 5rem;
 }
 .footer .warp {
   height: 80%;
