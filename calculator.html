@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <link type="text/css" rel="stylesheet" href="./style.css" />
+    <script src="./vue.js"></script>
+    <script src="./vue-router.js"></script>
+  </head>
+  <body>
+    <div id="app">
+      <router-view></router-view>
+    </div>
+
+    <script>
+      const App = {
+        template: `
+        <minical></minical>
+        `
+      }
+      
+      const Expend = {
+        template: `<div>
+          支出
+        </div>`
+      }
+      const Income = { template: `<div>
+        收入
+      </div>` }
+      
+      const router = new VueRouter({
+        routes: [{
+          path: '/',
+          component: App,
+          redirect: '/expend',
+          children:[
+            { path: '/expend',component: Expend },
+            { path: '/income',component: Income }
+          ]
+        }]
+      })
+
+      var hub = new Vue();
+
+      var CalTitle = {
+        template: `
+          <div class="header"> 
+            <div class="header_left"><router-link to="/expend">支出</router-link></div>
+            <div class="header_right"><router-link to="/income">收入</router-link></div>
+          </div>
+        `
+      }
+      var CalContent = {
+        data() {
+          return{
+            list: ['服饰','饮食','交通','住宿']
+          }
+        },
+        mounted: function () {
+          hub.$on('new-tag', (tags) => {
+            for(let i=0;i<this.list.length-1;i++){
+              if(this.list.includes(tags)){
+                alert("重复标签，请重新输入")
+                break;
+              }else{
+                this.list.push(tags)
+                break;
+              }
+            }
+          });
+        },
+        template: `
+          <div class="main">
+            <div class="content">
+              <router-view />
+              </div>
+              <div class="content_tag">
+                <ul>
+                <li :key='item.index' v-for='item in list'>{{item}}</li>
+                </ul>
+            </div>
+          </div>  
+        `
+      }
+      var CalFooter = {
+        data() {
+          return{
+            tags: ""
+          }
+        },
+        template: `
+          <div class="footer">
+              <div class="footer_nums">
+                <div class="nums_left">备注</div>
+                <div class="nums_right"></div>
+              </div>
+              <div class="warp">
+                <ul>
+                  <li>1</li>
+                  <li>2</li>
+                  <li>3</li>
+                  <li><input id=input v-model="tags" v-on:keyup.enter="newTag"
+                       maxlength="4" placeholder="添加标签" onfocus="this.placeholder=''" onblur="this.placeholder='添加标签'" /></li>
+                  <li>4</li>
+                  <li>5</li>
+                  <li>6</li>
+                  <li>删除</li>
+                  <li>7</li>
+                  <li>8</li>
+                  <li>9</li>
+                  <li>清空</li>
+                  <li style="width: 50%;">0</li>
+                  <li>.</li>
+                  <li>OK</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `,
+        methods: {
+          newTag: function () {
+            if(this.tags==''){
+              alert("请输入标签")
+            }else{
+              hub.$emit('new-tag',this.tags)
+            }
+            var input =document.getElementById("input");
+            input.placeholder="添加标签"
+            this.tags=""
+            input.blur();
+          }
+        }
+      }
+      
+      Vue.component('minical',{
+        template: `
+          <div style="height: 100%;">
+            <cal-title></cal-title>
+            <cal-content></cal-content>
+            <cal-footer></cal-footer>
+          </div>
+        `,
+        components: {
+          'cal-title': CalTitle,
+          'cal-content': CalContent,
+          'cal-footer': CalFooter
+        }
+      })
+
+      const vm = new Vue({
+        el: '#app',
+        router
+      })
+    </script>
+
+  </body>
+</html>
