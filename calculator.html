@@ -19,14 +19,60 @@
         `
       }
       
+      var hub = new Vue();
+      var hub1 = new Vue();
+      
       const Expend = {
-        template: `<div>
-          支出
+        data () {
+          return{
+            tag:''
+          }
+        },
+        mounted: function() {
+          hub1.$on('index-tag',(tag) => {
+            this.tag = tag
+          })
+        },
+        template: `
+        <div>
+          <div class="header_date">
+            <span>今日</span><span class="right">-￥100</span>
+          </div>
+          <div class="price">
+            <ul>
+              <li><span>{{tag}}</span><span class="right">-￥100</span></li>
+            </ul>
+          </div>
         </div>`
       }
-      const Income = { template: `<div>
-        收入
-      </div>` }
+      var Income = {
+        data () {
+          return{
+            tag:'',
+            price:''
+          }
+        },
+        mounted: function() {
+          hub1.$on('index-tag',(tag) => {
+            this.tag = tag
+          })
+          hub.$on('price',(price) => {
+            this.price = price
+          })
+        },
+        template: `
+        <div>
+          <div class="header_date">
+            <span>今日</span><span class="right">+￥100</span>
+          </div>
+          <div class="price">
+            <ul>
+              <li><span>{{tag}}</span><span class="right">+￥{{price}}</span></li>
+            </ul>
+          </div>
+        </div>
+      ` 
+      }
       
       const router = new VueRouter({
         routes: [{
@@ -40,7 +86,6 @@
         }]
       })
 
-      var hub = new Vue();
 
       var CalTitle = {
         template: `
@@ -56,6 +101,11 @@
             list: ['服饰','饮食','交通','住宿']
           }
         },
+        methods:{
+          handelTags: function(index) {
+            hub1.$emit('index-tag',this.list[index])
+          }
+        },
         mounted: function () {
           hub.$on('new-tag', (tags) => {
             for(let i=0;i<this.list.length-1;i++){
@@ -67,7 +117,7 @@
                 break;
               }
             }
-          });
+          })
         },
         template: `
           <div class="main">
@@ -76,7 +126,7 @@
               </div>
               <div class="content_tag">
                 <ul>
-                <li :key='item.index' v-for='item in list'>{{item}}</li>
+                <li :key='item.index' v-for='(item,index) in list' @click='handelTags(index)'>{{item}}</li>
                 </ul>
             </div>
           </div>  
@@ -86,15 +136,25 @@
         data() {
           return{
             tags: '',
-            test:[],
-            nums:[]
+            test:[0],
+            nums:[],
+            SHOW:0,
+            SHOW1:0
           }
         },
         template: `
           <div class="footer">
               <div class="footer_nums">
-                <div class="nums_left">备注</div>
+                <div class="nums_left" @click="handelInfo">备注</div>
                 <input class="nums_right" v-model="test" disabled max="8" />
+              </div>
+              <div id="info">
+                <div class="info_title">备注</div>
+                <div class="info_text"><input type="text" /></div>
+                <div class="info_btn">
+                  <button type="button" @click="handelInfo">确认</button>
+                  <button type="button" @click="handelInfo">关闭</button>
+                </div>
               </div>
               <div class="warp">
                 <ul>
@@ -106,14 +166,14 @@
                   <li @click="handelNums(4)">4</li>
                   <li @click="handelNums(5)">5</li>
                   <li @click="handelNums(6)">6</li>
-                  <li>删除</li>
+                  <li @click="clearNums">删除</li>
                   <li @click="handelNums(7)">7</li>
                   <li @click="handelNums(8)">8</li>
                   <li @click="handelNums(9)">9</li>
-                  <li>清空</li>
-                  <li style="width: 50%;">0</li>
+                  <li @click="emptyNums">清空</li>
+                  <li @click="handelNums(0)" style="width: 50%;">0</li>
                   <li @click="handelNums('.')">.</li>
-                  <li>OK</li>
+                  <li @click="handelSave">OK</li>
                 </ul>
               </div>
             </div>
@@ -136,6 +196,27 @@
               this.nums.push(e)
               this.test = this.nums.join("")
             }
+            if(this.test[0] == 0){
+              this.nums = []
+              this.nums.push(e)
+              this.test = this.nums.join("")
+            }
+          },
+          clearNums: function() {
+            this.nums.pop()
+            this.test = this.nums.join("")
+          },
+          emptyNums: function() {
+            this.nums = []
+            this.test = []
+          },
+          handelInfo: function() {
+            document.getElementById('info').style.display = ++this.SHOW % 2 == 1 ? 'block' : 'none';
+            document.getElementById('masking').style.display = ++this.SHOW1 % 2 == 1 ? 'block' : 'none';
+ 
+          },
+          handelSave: function() {
+            hub.$emit('price',this.test)
           }
         }
       }
@@ -146,6 +227,7 @@
             <cal-title></cal-title>
             <cal-content></cal-content>
             <cal-footer></cal-footer>
+            <div id="masking"></div>
           </div>
         `,
         components: {
